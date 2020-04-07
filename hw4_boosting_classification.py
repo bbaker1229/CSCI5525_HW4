@@ -16,3 +16,16 @@ N = 21283
 test_predictions = np.random.random(N)
 test_predictions = test_predictions.reshape(N, 1)
 ts.error_rate(test_predictions)
+
+# Examples of how Alpha and E works for boosting - Delete later.
+np.array([1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 0.0]) / 10
+
+D1 = np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0])
+y = np.array([1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0])
+h1 = np.array([1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, 1.0, -1.0])
+
+D2 = D1 * np.exp(-0.42 * y * h1)
+
+h2 = np.array([1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, -1.0, 1.0, -1.0])
+
+D3 = D2 * np.exp(-0.65 * y * h2)
