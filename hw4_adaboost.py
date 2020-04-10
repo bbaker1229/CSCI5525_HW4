@@ -11,6 +11,36 @@ import pandas as pd
 from sklearn.tree import DecisionTreeClassifier
 import matplotlib.pyplot as plt
 
+
+def plot_margin(data, learner_lst, alpha_lst):
+    """
+    Create a margin plot.
+    :param data: The dataset used to create the model.
+    :param learner_lst: A list of weak learners.
+    :param alpha_lst: A list of alphas to use in the Adaboost model.
+    :return: A margin plot.
+    """
+    margin = []
+    for i in range(data.shape[0]):
+        f_x = 0
+        for j in range(len(learner_lst)):
+            f_x += (alpha_lst[j] * learner_lst[j].predict(np.array(data.iloc[i]).reshape(1, -1)))
+        margin.append(f_x[0])
+    margin = margin / sum(alpha_lst)
+    margin = train_y.reshape(-1) * margin
+    margin.sort()
+    cumulative = np.cumsum(margin)
+    cumulative = cumulative / sum(margin)
+    plt.plot(margin, cumulative)
+    plt.title("Adaboost Margin Plot for " + str(len(learner_lst)) + " learners")
+    plt.xlabel("Margin")
+    plt.ylabel("Cumulative Distribution")
+    plt.xlim(-1, 1)
+    plt.ylim(0, 1)
+    plt.grid()
+    plt.show()
+
+
 # Read and prepare training dataset
 training_data = pd.read_csv("cancer_train.csv")
 train_y = np.array(training_data["y"])
@@ -27,7 +57,7 @@ test_y[test_y == 0] = -1
 test_x = testing_data
 test_x = test_x.drop("y", axis=1)
 
-# Initialize weights and lists to store alphas and trees
+# Initialize weights and lists to store alpha_lst and learner_lst
 D_train = np.full(train_y.shape, 1/train_y.shape[0]).reshape(-1)
 D_train = D_train / np.sum(D_train)
 D_test = np.full(test_y.shape, 1/test_y.shape[0]).reshape(-1)
@@ -71,6 +101,8 @@ for i in range(100):
     test_error = np.mean(np.not_equal(y_test_preds, test_y.reshape(-1)))
     test_error_lst.append(test_error)
     print("Training error: " + str(train_error) + "; Testing error: " + str(test_error))
+    if i in [24, 49, 74, 99]:
+        plot_margin(train_x, trees, alphas)
 
 # Create the misclassification plot
 plt.xlabel('Number of Weak Learners')
