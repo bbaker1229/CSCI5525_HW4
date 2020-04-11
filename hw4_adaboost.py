@@ -72,7 +72,7 @@ test_error_lst = []
 for i in range(100):
     iter.append(i)
     # Train the weak learner using the sample weights we calculated
-    decision_tree = DecisionTreeClassifier(max_depth=1)
+    decision_tree = DecisionTreeClassifier(max_depth=1, criterion="gini")
     decision_tree = decision_tree.fit(train_x, train_y, sample_weight=D_train)
     # Store the learner
     trees.append(decision_tree)
