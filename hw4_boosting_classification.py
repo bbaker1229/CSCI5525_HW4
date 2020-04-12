@@ -6,52 +6,46 @@
 # File Name: hw4_boosting_classification.py
 ############################################
 
-# Need to get this to work
-
 import numpy as np
-import pandas as pd
 import matplotlib.pyplot as plt
 import test_error_rate as ts
 
-# Example of how the error_rate function works
-N = 21283
-test_predictions = np.random.random(N)
-test_predictions = test_predictions.reshape(N, 1)
-ts.error_rate(test_predictions)
+# Define constant parameter
+N = 21283  # Number of items in array
 
-N = 21283
-alpha = 0.1
-theta = 0.001
+# Create an array of random predictions
 new_predictions = np.random.random(N)
 new_predictions = new_predictions.reshape(N, 1)
-print(ts.error_rate(new_predictions))
-new_error = ts.error_rate(new_predictions)
-old_error = 100
-constant_val = np.sum(new_predictions**2)
-i = 1
-iter = []
-error_lst = []
-# for i in range(10):
-while np.abs(old_error - new_error) > 0.00001:
-    old_error = new_error
-    old_predictions = new_predictions
-    error_0 = np.apply_along_axis(ts.error_rate, 1, old_predictions)
-    error_0 = error_0.reshape(-1, 1)
-    error_theta = np.apply_along_axis(ts.error_rate, 1, old_predictions + theta)
-    error_theta = error_theta.reshape(-1, 1)
-    delta_loss = (error_theta - error_0) / theta
-    new_predictions = old_predictions - alpha * delta_loss
-    new_predictions = new_predictions * np.sqrt(constant_val / np.sum(new_predictions ** 2))
-    print(ts.error_rate(new_predictions))
+new_predictions[new_predictions >= 0.5] = 1.0
+new_predictions[new_predictions < 0.5] = -1.0
+new_predictions[new_predictions == -1] = 0
+print(ts.error_rate(new_predictions))  # what is the error for this prediction?
+
+# Create variables to use for a loop
+new_error = ts.error_rate(new_predictions)  # save the current error
+iter = []  # Use to save the iteration number
+error_lst = []  # Use to save the errors
+
+# Loop through each value and change from a 1 to -1 (or zero) or otherwise
+# and choose the value that gives the lower error.
+for i in range(N):
+    old_error = new_error  # save the old error
+    old_predictions = new_predictions.copy()  # save the old predictions
+    # change the ith value of the predictions
+    new_predictions[new_predictions == 0] = -1
+    new_predictions[i] = new_predictions[i] * -1
+    new_predictions[new_predictions == -1] = 0
+    # Compare new error rate to the old error rate
+    if ts.error_rate(new_predictions) > ts.error_rate(old_predictions):
+        new_predictions = old_predictions.copy()  # if old error was better keep old predictions.
+    # Save new values
     new_error = ts.error_rate(new_predictions)
+    print(new_error)
     iter.append(i)
-    i += 1
     error_lst.append(new_error)
-    # print(iter)
-    # print(error_lst)
 
 # Create the misclassification plot
-plt.xlabel('Number of Weak Learners')
+plt.xlabel('Iteration')
 plt.ylabel('Error')
 plt.title('Error Improvement based on boosting')
 plt.grid()

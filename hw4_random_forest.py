@@ -13,6 +13,11 @@ import matplotlib.pyplot as plt
 
 
 def build_dataset(data):
+    """
+    Create a data set by sampling from another data set with replacement.
+    :param data: A data set
+    :return: A data set for the x values and a data set for the y values
+    """
     n = data.shape[0]
     new_dataset = data.sample(n=n, replace=True)
     y = np.array(new_dataset["y"])
@@ -24,12 +29,26 @@ def build_dataset(data):
 
 
 def train_classifier(data_x, data_y, max_features):
-    decision_tree = DecisionTreeClassifier(max_depth=1, criterion="gini", max_features=max_features)
+    """
+    Use to train a decision tree classifier using the gini criteria
+    :param data_x: A data set containing the x values
+    :param data_y: A data set containing the target values
+    :param max_features: The number of max features to consider when making a split.
+    :return: A decision tree classifier
+    """
+    decision_tree = DecisionTreeClassifier(criterion="gini", max_features=max_features)
     decision_tree = decision_tree.fit(data_x, data_y)
     return decision_tree
 
 
 def random_forest(data, max_features, n_trees=100):
+    """
+    Creates a random forest model
+    :param data: The data set to use for the training.  Containing both x and y values.
+    :param max_features: The max number of features to consider at each split.
+    :param n_trees: The number of trees to create for the random forest model
+    :return: A random forest predictor
+    """
     forest = []
     for i in range(n_trees):
         train_x, train_y = build_dataset(data)
@@ -39,6 +58,12 @@ def random_forest(data, max_features, n_trees=100):
 
 
 def fit_r_forest(model, data):
+    """
+    Use with the random forest predictor above to return prediction values.
+    :param model: A random forest predictor as defined above.
+    :param data: The data set containing the parameters to use for the prediction
+    :return: An array of predictions.
+    """
     final_data = 0
     for i in model:
         tree = i.predict(data)
@@ -49,6 +74,7 @@ def fit_r_forest(model, data):
     return final_data
 
 
+# Read training and test data sets
 training_data = pd.read_csv("health_train.csv")
 testing_data = pd.read_csv("health_test.csv")
 
@@ -79,8 +105,11 @@ for features in feature_sizes:
     test_y = np.array(testing_data["y"])
     acc_val = np.mean(np.equal(preds, test_y))
     test_accuracy.append(acc_val)
+
+# Create the dataframe to use for the plot
 dict = {'feature_size': feature_sizes, 'train_accuracy': train_accuracy, 'test_accuracy': test_accuracy}
 df = pd.DataFrame(dict)
+# Plot the data for training and test
 df.plot(kind='line', x='feature_size', y='train_accuracy')
 df.plot(kind='line', x='feature_size', y='test_accuracy', color='red', ax=plt.gca())
 plt.title("Accuracy by feature_size with a random forest of 100 trees")
@@ -105,8 +134,11 @@ for n_trees in tree_size:
     test_y = np.array(testing_data["y"])
     acc_val = np.mean(np.equal(preds, test_y))
     test_accuracy.append(acc_val)
+
+# Create the dataframe to use for the plot
 dict = {'tree_size': tree_size, 'train_accuracy': train_accuracy, 'test_accuracy': test_accuracy}
 df = pd.DataFrame(dict)
+# Plot the data for training and test
 df.plot(kind='line', x='tree_size', y='train_accuracy')
 df.plot(kind='line', x='tree_size', y='test_accuracy', color='red', ax=plt.gca())
 plt.title("Accuracy by tree_size with a random forest of 250 max feature size")
